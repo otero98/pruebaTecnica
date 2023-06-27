@@ -10,7 +10,8 @@ export const todoSlice = createSlice({
         active: {
             title: '',
             description: '',
-            status: ''
+            status: '',
+            id: ''
         },
     },
     reducers: {

@@ -45,18 +45,24 @@ export const TodoView = () => {
 	}
 
 	const onDeleteTodos = (e) => {
-		e.preventDefault();
+		onResetForm();
+		setIsNewTodo(true);
+		setChecked(false)
 		startDeleteTodo(todo.id);
-		cleanTodo(e);
 	}
 
 	return (
 		<div className='container mt-5'>
-			<div className="container text-end mb-4">
-				<button
-					className="btn btn-outline-success my-2 my-sm-0 "
-					onClick={cleanTodo}
-				>Nueva tarea</button>
+			<div className="row mb-4">
+				<div className="col">
+					<h3>{isNewTodo ? 'Nueva tarea' : 'Editar Tarea'}</h3>
+				</div>
+				<div className="col">
+					<button
+						className="btn btn-outline-success my-2 my-sm-0 "
+						onClick={cleanTodo}
+					>Nueva tarea</button>
+				</div>
 			</div>
 			<div className="card ">
 				<div className="card-body">
