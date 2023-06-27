@@ -1,34 +1,64 @@
-import React, { useEffect, useMemo } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useForm } from '../../hooks/useForm';
 import { useTodoStore } from '../../hooks/useTodoStore';
+import { useEffect, useState } from 'react';
 
 
 export const TodoView = () => {
 
-	const dispatch = useDispatch();
-
-	const { startUpdateTodo } = useTodoStore();
+	const { startUpdateTodo, startNewTodo, startCleanActive, startDeleteTodo } = useTodoStore();
 
 	const { active: todo, isLoadingTodos } = useSelector(state => state.todo);
 
-	const { description, title, onInputChange } = useForm(todo);
+	const { description, title, onInputChange, onResetForm } = useForm(todo);
+
+	const [isNewTodo, setIsNewTodo] = useState(true);
+
+	const [checked, setChecked] = useState(false);
+
+	useEffect(() => {
+		setIsNewTodo(todo.title == '' && todo.description == '');
+		setChecked(todo.status == 'Done');
+	}, [todo])
 
 	const onSaveTodo = (e) => {
 		e.preventDefault();
+		const status = (checked ? 'Done' : 'Pending');
+		setIsNewTodo(false);
+		startUpdateTodo(title, description, status, todo.id);
+	}
 
-		const formData = new FormData();
-		formData.append("title", title);
-		formData.append("description", description);
 
-		console.log(formData);
+	const newTodo = (e) => {
+		e.preventDefault();
+		setIsNewTodo(false);
+		startNewTodo(title, description);
+	}
 
-		//dispatch(startUpdateTodo(formData, todo.id))
+
+	const cleanTodo = (e) => {
+		e.preventDefault();
+		onResetForm();
+		startCleanActive();
+		setIsNewTodo(true);
+		setChecked(false)
+	}
+
+	const onDeleteTodos = (e) => {
+		e.preventDefault();
+		startDeleteTodo(todo.id);
+		cleanTodo(e);
 	}
 
 	return (
 		<div className='container mt-5'>
-			<div className="card">
+			<div className="container text-end mb-4">
+				<button
+					className="btn btn-outline-success my-2 my-sm-0 "
+					onClick={cleanTodo}
+				>Nueva tarea</button>
+			</div>
+			<div className="card ">
 				<div className="card-body">
 					<form className="form">
 						<div className="form-body">
@@ -62,27 +92,38 @@ export const TodoView = () => {
 								</textarea>
 
 							</div>
-							<div className="form-check my-3">
-								<input
-									className="form-check-input"
-									type="checkbox"
-									value=""
-									id="flexCheckDefault" />
-								<label className="form-check-label pl-2" forhtml="flexCheckDefault">
-									Completada
-								</label>
-							</div>
+							{
+								!isNewTodo && (<div className="form-check my-3">
+									<input
+										className="form-check-input"
+										type="checkbox"
+										value={checked}
+										checked={checked}
+										onChange={() => setChecked(!checked)}
+										id="flexCheckDefault" />
+									<label className="form-check-label pl-2" forhtml="flexCheckDefault">
+										Completada
+									</label>
+								</div>)
+							}
+
 						</div>
 
 						<div className="form-actions right">
+							{
+								!isNewTodo && (
+									<button
+										type="button"
+										onClick={onDeleteTodos}
+										className="btn btn-default mr-1 "
+
+									>
+										<i className="ft-x"></i> Eliminar
+									</button>
+								)
+							}
 							<button
-								type="button"
-								className="btn btn-default mr-1"
-							>
-								<i className="ft-x"></i> Cancelar
-							</button>
-							<button
-								onClick={onSaveTodo}
+								onClick={isNewTodo ? newTodo : onSaveTodo}
 								className="btn btn-primary">
 								<i className="fa fa-check-square-o"></i> Guardar
 							</button>

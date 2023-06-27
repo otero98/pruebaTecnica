@@ -6,9 +6,10 @@ const createToDo = async (req, resp = response) => {
     try {
         const toDo = new ToDo(req.body);
 
-        await toDo.save();
+        const data = await toDo.save();
         resp.status(200).json({
-            msg: "Tarea creada"
+            msg: "Tarea creada",
+            data
         })
 
     } catch (error) {

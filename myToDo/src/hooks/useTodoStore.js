@@ -1,6 +1,19 @@
 import { useDispatch, useSelector } from "react-redux"
 import backendApi from "../api/backendApi";
-import { addNewTodo, getTodos, setActiveTodo, updateTodos } from "../store/todos/todoSlice"
+import { addNewTodo, getTodos, setActiveTodo, updateTodos, cleanActiveTodo, deleteTodos } from "../store/todos/todoSlice"
+import Swal from 'sweetalert2'
+
+const Toast = Swal.mixin({
+    toast: true,
+    position: "bottom-start",
+    showConfirmButton: false,
+    timer: 2000,
+    timerProgressBar: false,
+    onOpen: (toast) => {
+        toast.addEventListener("mouseenter", Swal.stopTimer);
+        toast.addEventListener("mouseleave", Swal.resumeTimer);
+    },
+});
 
 export const useTodoStore = () => {
     const dispatch = useDispatch();
@@ -17,31 +30,50 @@ export const useTodoStore = () => {
         }
 
     }
-    const startNewNote = async () => {
+
+    const startNewTodo = async (title, description) => {
         try {
+            const { data } = await backendApi.post("/todos/", { title, description });
+            dispatch(addNewTodo(data));
+            dispatch(setActiveTodo(data.data));
+            Toast.fire({
+                icon: 'success',
+                title: 'Tarea creada'
+            })
 
-            const newTodo = {
-                title: "prueba",
-                description: "qwerty"
-            }
-            const { data } = await backendApi.post("/todos/", newTodo);
-            console.log(data);
-
-            dispatch(addNewTodo(newTodo));
-            dispatch(setActiveTodo(newTodo))
+        } catch (error) {
+            console.log(error);
+        }
+    }
+    const startCleanActive = () => {
+        dispatch(cleanActiveTodo())
+    }
+    const startUpdateTodo = async (title, description, status, id) => {
+        try {
+            const { data } = await backendApi.put(`/todos/${id}`, { title, description, status });
+            dispatch(updateTodos(data.data));
+            Toast.fire({
+                icon: 'success',
+                title: 'Tarea actualizada'
+            })
 
         } catch (error) {
             console.log(error);
         }
     }
 
-    const startUpdateTodo = async (todo, id) => {
-        console.log(todo);
-        console.log(id);
+
+    const startDeleteTodo = async (id) => {
         try {
-            const { data } = await backendApi.put(`/todos/${id}`, todo);
+            const { data } = await backendApi.delete(`/todos/${id}`)
             console.log(data);
-            dispatch(updateTodos(data.data));
+            dispatch(deleteTodos());
+
+            Toast.fire({
+                icon: 'success',
+                title: `${data.msg}`
+            });
+
         } catch (error) {
             console.log(error);
         }
@@ -56,7 +88,9 @@ export const useTodoStore = () => {
 
         //metodos
         startLoadingTodos,
-        startNewNote,
-        startUpdateTodo
+        startNewTodo,
+        startUpdateTodo,
+        startCleanActive,
+        startDeleteTodo
     }
 }

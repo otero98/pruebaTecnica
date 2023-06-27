@@ -15,7 +15,7 @@ export const SideBarItem = ({ title, created, description, status, id }) => {
     const dispatch = useDispatch();
 
     const todoActive = () => {
-        dispatch(setActiveTodo({ title, description, id }))
+        dispatch(setActiveTodo({ title, description, id, status }))
     }
 
 
@@ -30,7 +30,7 @@ export const SideBarItem = ({ title, created, description, status, id }) => {
 
         <a className="list-group-item list-group-item-action py-3 lh-tight " aria-current="true" onClick={todoActive}>
             <div className="d-flex w-100 align-items-center justify-content-between">
-                <strong className="mb-1">{newTitle}</strong>
+                <strong className={`mb-1 ${status == 'Pending' ? '' : 'completed'}`}>{newTitle}</strong>
                 <small>{formatDate(created)}</small>
             </div>
             <div className="col-10 mb-1 small">{description}</div>

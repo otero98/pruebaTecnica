@@ -7,13 +7,24 @@ export const todoSlice = createSlice({
     initialState: {
         isLoadingTodos: true,
         todos: [],
-        active: null,
+        active: {
+            title: '',
+            description: '',
+            status: ''
+        },
     },
     reducers: {
         addNewTodo: (state, { payload }) => {
-            state.todos.push(payload);
+            state.todos.push(payload.data);
         },
-        setActiveTodo: (state, {payload}) => {
+        cleanActiveTodo: (state) => {
+            state.active = {
+                title: '',
+                description: '',
+                status: ''
+            };
+        },
+        setActiveTodo: (state, { payload }) => {
             state.active = payload;
         },
         getTodos: (state, { payload = [] }) => {
@@ -28,7 +39,11 @@ export const todoSlice = createSlice({
                 return todo;
             })
         },
+        deleteTodos: (state) => {
+            state.todos = state.todos.filter(todos => todos.id !== state.active.id)
+
+        }
 
     }
 })
-export const { addNewTodo, getTodos, updateTodos, setActiveTodo } = todoSlice.actions;
+export const { addNewTodo, getTodos, updateTodos, setActiveTodo, cleanActiveTodo, deleteTodos } = todoSlice.actions;
